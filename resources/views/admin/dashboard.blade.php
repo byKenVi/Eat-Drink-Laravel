@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de Bord Admin - Eat&Drink</title>
-    {{-- Liens CSS ou inclure votre fichier app.css si vous le compilez --}}
     <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -20,8 +19,6 @@
 
     <div class="container">
         <h2>Gestion des Demandes et Vue d'Ensemble</h2>
-
-        {{-- Affichage des messages de session (succès, erreur, avertissement) --}}
         @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
@@ -37,7 +34,6 @@
                 {{ session('warning') }}
             </div>
         @endif
-        {{-- Affichage des erreurs de validation du motif de rejet --}}
         @if ($errors->any())
             <div class="alert alert-error">
                 <ul>
@@ -60,7 +56,6 @@
                         <th>Nom Entreprise</th>
                         <th>Nom Complet</th>
                         <th>Email</th>
-                        <th>Date de Demande</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -70,7 +65,6 @@
                             <td>{{ $utilisateur->nom_entreprise }}</td>
                             <td>{{ $utilisateur->prenom }} {{ $utilisateur->nom }}</td>
                             <td>{{ $utilisateur->email }}</td>
-                            <td>{{ $utilisateur->created_at->format('d/m/Y H:i') }}</td>
                             <td class="action-buttons">
                                 {{-- Bouton Approuver --}}
                                 <form action="{{ route('admin.approuver_demande', ['utilisateur' => $utilisateur->id]) }}" method="POST">
@@ -86,7 +80,6 @@
             </table>
         @endif
 
-        {{-- Section Commandes Passées (Bonus pour une vue d'ensemble admin) --}}
         <h3>Aperçu des Commandes Passées</h3>
         @if($commandesParStand->isEmpty())
             <div class="no-data-message">
@@ -115,7 +108,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                <br> {{-- Petite marge entre les tableaux de stands --}}
+                <br>
             @endforeach
         @endif
 
@@ -129,7 +122,6 @@
             <form id="rejectForm" method="POST">
                 @csrf
                 <textarea name="motif_rejet" rows="4" placeholder="Ex: Informations manquantes, non-conformité avec nos critères..." required></textarea>
-                {{-- Un champ caché pour passer l'ID de l'utilisateur à rejeter --}}
                 <input type="hidden" name="utilisateur_id" id="modalUtilisateurId">
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="closeRejectModal()">Annuler</button>
@@ -155,7 +147,6 @@
         // Fonction pour fermer la modale de rejet
         function closeRejectModal() {
             document.getElementById('rejectModal').style.display = 'none';
-            // Optionnel : Réinitialiser le champ texte lors de la fermeture
             document.querySelector('#rejectModal textarea[name="motif_rejet"]').value = '';
         }
 

@@ -16,7 +16,7 @@ class AdminController extends Controller
     public function dashboard()
     {
         // 1. Lister les demandes de stand en attente
-        $demandesEnAttente = Utilisateur::where('role', 'entrepreneur_en_attente')->get();
+        $demandesEnAttente = User::where('role', 'entrepreneur')->where('status', 'pending')->get();
 
         // 2.Afficher des commandes passées
         $commandesParStand = Commande::with('stand', 'utilisateur')
@@ -27,22 +27,15 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('demandesEnAttente', 'commandesParStand'));
     }
 
-    public function approuverDemande(Utilisateur $utilisateur)
+    public function approuverDemande(User $utilisateur)
     {
-        // Vérifie que la demande est bien en attente avant d'approuver
-        if ($utilisateur->role !== 'entrepreneur_en_attente') {
-            return redirect()->back()->with('error', 'Cette demande ne peut pas être approuvée (statut incorrect ou déjà traité).');
-        }
 
-        // Utilise une transaction pour s'assurer que toutes les opérations réussissent ou échouent ensemble
+        // Utilisation d'une transaction pour s'assurer que toutes les opérations réussissent ou échouent ensemble
         DB::transaction(function () use ($utilisateur) {
             // Mise à jour du rôle de l'utilisateur
-            $utilisateur->update(['role' => 'entrepreneur_approuve']);
-
-            // Création d'un stand associé à cet utilisateur s'il n'en a pas déjà un
-            // La relation 'stand' (hasOne) doit être définie dans le modèle Utilisateur
+            $utilisateur->update(['status' => 'entrepreneur_approuve']);
             if (!$utilisateur->stand) {
-                Stand::create([
+                StandRequest::create([
                     'utilisateur_id' => $utilisateur->id,
                     'nom_stand' => $utilisateur->nom_entreprise ?: 'Stand de ' . $utilisateur->prenom . ' ' . $utilisateur->nom,
                     'description' => 'Bienvenue sur le stand de ' . ($utilisateur->nom_entreprise ?: $utilisateur->nom) . ' !',
@@ -61,12 +54,8 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'La demande de ' . $utilisateur->nom_entreprise . ' a été approuvée avec succès et un stand a été créé. Un email a été envoyé.');
     }
 
-    public function rejeterDemande(Request $request, Utilisateur $utilisateur)
+    public function rejeterDemande(Request $request, User $utilisateur)
     {
-        // Vérifie que la demande est bien en attente avant de rejeter
-        if ($utilisateur->role !== 'entrepreneur_en_attente') {
-            return redirect()->back()->with('error', 'Cette demande ne peut pas être rejetée (statut incorrect ou déjà traité).');
-        }
 
         // Validation du motif de rejet 
         $request->validate([

@@ -25,12 +25,12 @@ class Commande extends Model
 
     public function stand()
     {
-        return $this->belongsTo(Stand::class, 'stand_id');
+        return $this->belongsTo(StandRequest::class, 'stand_id');
     }
 
     public function utilisateur()
     {
-        return $this->belongsTo(Utilisateur::class, 'utilisateur_id');
+        return $this->belongsTo(User::class, 'utilisateur_id');
     }
 
 }
